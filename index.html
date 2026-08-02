@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#06111b">
+  <title>Trading Analyst Pro MR</title>
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./assets/icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./css/style.css?v=9.1.0">
+</head>
+<body>
+  <main class="app-shell">
+    <header class="hero">
+      <div class="brand">
+        <div class="logo">MR</div>
+        <div>
+          <p class="eyebrow">PRECISION ENTRIES · LIVE ANALYSIS</p>
+          <h1>TRADING ANALYST <span>PRO MR</span></h1>
+        </div>
+      </div>
+      <div class="status-row">
+        <div id="estadoConexion" class="status-pill offline"><span class="dot"></span><b id="textoEstadoConexion">OFFLINE</b></div>
+        <div id="estadoMotor" class="status-pill"><span>⚡</span><b id="textoEstadoMotor">OFF</b></div>
+        <div class="status-pill"><span>↯</span><b id="estadoMemoria">0</b></div>
+      </div>
+    </header>
+
+    <section class="card controls">
+      <div class="grid-2">
+        <label>Strategy
+          <select id="selectorEstrategia">
+            <option value="rise_fall">Rise / Fall</option>
+            <option value="even_odd">Even / Odd</option>
+            <option value="over_under">Over / Under</option>
+            <option value="match">Matches</option>
+          </select>
+        </label>
+        <label>Market
+          <select id="selectorMercado">
+            <option value="1HZ10V">Volatility 10 (1s)</option>
+            <option value="1HZ25V">Volatility 25 (1s)</option>
+            <option value="1HZ50V">Volatility 50 (1s)</option>
+            <option value="1HZ75V">Volatility 75 (1s)</option>
+            <option value="1HZ100V" selected>Volatility 100 (1s)</option>
+            <option value="R_10">Volatility 10 Index</option>
+            <option value="R_25">Volatility 25 Index</option>
+            <option value="R_50">Volatility 50 Index</option>
+            <option value="R_75">Volatility 75 Index</option>
+            <option value="R_100">Volatility 100 Index</option>
+          </select>
+        </label>
+        <label>Mode
+          <select id="selectorModo">
+            <option value="fast">Fast</option>
+            <option value="complete">Complete</option>
+          </select>
+        </label>
+        <label>Horizon
+          <select id="selectorHorizonte">
+            <option value="10s">10 seconds</option>
+            <option value="1m">1 minute</option>
+            <option value="2m">2 minutes</option>
+            <option value="5m">5 minutes</option>
+          </select>
+        </label>
+      </div>
+      <div class="button-grid">
+        <button id="botonConectar" class="primary">CONNECT</button>
+        <button id="botonDesconectar" class="ghost" disabled>DISCONNECT</button>
+        <button id="botonEncenderMotor" class="primary" disabled>START ENGINE</button>
+        <button id="botonPrediccion" class="accent" disabled>PREDICTION</button>
+      </div>
+      <p id="mensajeControl" class="helper">Select market and strategy, then connect.</p>
+    </section>
+
+    <section id="panelMonitoreo" class="card monitor monitoring">
+      <div class="monitor-head">
+        <div>
+          <p class="eyebrow">OPPORTUNITY ENGINE</p>
+          <h2 id="tituloMonitoreo">MONITORING INACTIVE</h2>
+        </div>
+        <div id="estadoMonitoreo" class="mini-pill"><span id="textoEstadoMonitoreo">INACTIVE</span></div>
+      </div>
+      <p id="detalleMonitoreo">Waiting for engine.</p>
+      <div class="progress-track"><div id="barraProgresoMotor"></div></div>
+      <div class="stage-row">
+        <span id="pasoSearch">SEARCH</span><span id="pasoValidate">VALIDATE</span><span id="pasoPrepare">PREPARE</span><span id="pasoExecute">EXECUTE</span>
+      </div>
+      <button id="botonCancelarMonitoreo" class="danger small" hidden>CANCEL OPPORTUNITY</button>
+    </section>
+
+    <section class="card market-data">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">LIVE MARKET</p>
+          <h2 id="nombreMercado">Volatility 100 (1s) Index</h2>
+        </div>
+        <span id="estadoDatos" class="mini-pill">NO DATA</span>
+      </div>
+      <div class="metrics">
+        <article><small>PRICE</small><strong id="precioActual">--</strong></article>
+        <article><small>TICKS</small><strong id="contadorTicks">0</strong></article>
+        <article><small>LAST DIGIT</small><strong id="ultimoDigito">--</strong></article>
+        <article><small>TIME</small><strong id="horaActualizacion">--</strong></article>
+      </div>
+      <div id="listaUltimosDigitos" class="digits"><span class="muted">Waiting for data</span></div>
+    </section>
+
+    <section class="card signal-card monitoring" id="panelSenal">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">SIGNAL</p>
+          <h2 id="tituloPrediccion">Waiting for opportunity</h2>
+        </div>
+        <span id="estadoPrediccion" class="mini-pill">MONITORING</span>
+      </div>
+      <div class="signal-value" id="valorPrediccion">--</div>
+      <div class="score-row"><span>Signal Score</span><b id="puntajeSenal">0/100</b></div>
+      <div class="score-track"><div id="barraPuntaje"></div></div>
+      <div class="countdown" id="cuentaRegresiva">--</div>
+      <p id="mensajeOperacion">No active signal.</p>
+      <ul id="listaMotivos"><li>Engine has not generated a signal yet.</li></ul>
+    </section>
+
+    <section class="card indicators">
+      <div class="section-head"><div><p class="eyebrow">TECHNICAL FILTERS</p><h2>Indicators</h2></div></div>
+      <div class="metrics">
+        <article><small>TREND</small><strong id="tendencia">--</strong><p id="detalleTendencia">Waiting</p></article>
+        <article><small>RSI</small><strong id="rsi">--</strong><p id="detalleRsi">Waiting</p></article>
+        <article><small>MOMENTUM</small><strong id="momentum">--</strong><p id="detalleMomentum">Waiting</p></article>
+        <article><small>VOLATILITY</small><strong id="volatilidad">--</strong><p id="detalleVolatilidad">Waiting</p></article>
+      </div>
+      <div class="fib-box">
+        <div><small>FIBONACCI</small><strong id="estadoFibonacci">NO DATA</strong></div>
+        <p id="detalleFibonacci">Collecting prices.</p>
+        <div class="fib-stats"><span>Nearest <b id="nivelFibonacciCercano">--</b></span><span>High <b id="maximoFibonacci">--</b></span><span>Low <b id="minimoFibonacci">--</b></span></div>
+      </div>
+    </section>
+
+    <section class="card stats">
+      <div class="section-head"><div><p class="eyebrow">OBSERVED PERFORMANCE</p><h2>Current setup only</h2></div></div>
+      <div class="metrics">
+        <article><small>TESTS</small><strong id="estadisticaIntentos">0</strong></article>
+        <article><small>SUCCESS</small><strong id="estadisticaAciertos">0</strong></article>
+        <article><small>FAILED</small><strong id="estadisticaFallos">0</strong></article>
+        <article><small>ACCURACY</small><strong id="estadisticaPrecision">NO DATA</strong></article>
+      </div>
+      <p id="precisionObservada" class="helper">0 / 0 TESTS</p>
+      <button id="botonReiniciarEstadisticas" class="ghost small">RESET CURRENT STATS</button>
+    </section>
+
+    <section class="card voice">
+      <div class="section-head"><div><p class="eyebrow">VOICE ASSISTANT</p><h2>Spanish alerts</h2></div><button id="botonVoz" class="icon-button">🔊</button></div>
+      <div class="grid-2">
+        <label>Voice<select id="selectorVoz"></select></label>
+        <label>Speed<input id="velocidadVoz" type="range" min=".6" max="1.25" step=".05" value=".9"><span id="valorVelocidad">0.90x</span></label>
+      </div>
+      <button id="botonProbarVoz" class="ghost">TEST VOICE</button>
+    </section>
+
+    <section class="card">
+      <div class="section-head"><div><p class="eyebrow">ACTIVITY</p><h2>System log</h2></div><button id="botonLimpiarRegistro" class="ghost small">CLEAR</button></div>
+      <div id="registroActividad" class="log"></div>
+    </section>
+
+    <footer>Trading Analyst Pro MR · Development build · Use demo testing first</footer>
+  </main>
+
+  <div id="capsulaSenal" class="signal-toast" aria-hidden="true">
+    <small id="estadoCapsula">PREPARE</small>
+    <strong id="valorCapsula">--</strong>
+    <p id="detalleCapsula">--</p>
+  </div>
+
+  <script type="module" src="./js/app.js?v=9.1.0"></script>
+</body>
+</html>
