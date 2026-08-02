@@ -1,36 +1,542 @@
-import{derivAPI}from"./deriv-api.js";import{crearResumenTecnico}from"./indicators.js";import{generarPrediccion,clasificarPuntaje,crearTextoOperacion}from"./prediction.js";import{monitorOportunidades,ESTADOS_MONITOR}from"./monitor.js";import{asistenteVoz}from"./voice.js";
-const $=id=>document.getElementById(id),E={};["estadoConexion","textoEstadoConexion","estadoMotor","textoEstadoMotor","estadoMemoria","botonConectar","botonDesconectar","botonEncenderMotor","botonPrediccion","mensajeControl","selectorEstrategia","selectorMercado","selectorModo","selectorHorizonte","panelMonitoreo","tituloMonitoreo","detalleMonitoreo","estadoMonitoreo","textoEstadoMonitoreo","barraProgresoMotor","pasoSearch","pasoValidate","pasoPrepare","pasoExecute","botonCancelarMonitoreo","nombreMercado","estadoDatos","precioActual","contadorTicks","ultimoDigito","horaActualizacion","listaUltimosDigitos","panelSenal","estadoPrediccion","tituloPrediccion","valorPrediccion","puntajeSenal","barraPuntaje","cuentaRegresiva","mensajeOperacion","listaMotivos","tendencia","detalleTendencia","rsi","detalleRsi","momentum","detalleMomentum","volatilidad","detalleVolatilidad","estadoFibonacci","detalleFibonacci","nivelFibonacciCercano","maximoFibonacci","minimoFibonacci","estadisticaIntentos","estadisticaAciertos","estadisticaFallos","estadisticaPrecision","precisionObservada","botonReiniciarEstadisticas","botonVoz","selectorVoz","velocidadVoz","valorVelocidad","botonProbarVoz","registroActividad","botonLimpiarRegistro","capsulaSenal","estadoCapsula","valorCapsula","detalleCapsula"].forEach(id=>E[id]=$(id));
-const markets={1HZ10V:"Volatility 10 (1s) Index",1HZ25V:"Volatility 25 (1s) Index",1HZ50V:"Volatility 50 (1s) Index",1HZ75V:"Volatility 75 (1s) Index",1HZ100V:"Volatility 100 (1s) Index",R_10:"Volatility 10 Index",R_25:"Volatility 25 Index",R_50:"Volatility 50 Index",R_75:"Volatility 75 Index",R_100:"Volatility 100 Index"};
-const S={connected:false,engine:false,symbol:"1HZ100V",strategy:"rise_fall",mode:"fast",horizon:"10s",prices:[],digits:[],ticks:0,last:null,pip:2,lastAnalysis:0,activeSignal:null,stats:{}};let toastTimer=null,countTimer=null;
-const text=(e,t)=>e&&(e.textContent=String(t)),log=(m,c="")=>{if(!E.registroActividad)return;const p=document.createElement("p");p.textContent=`[${new Date().toLocaleTimeString("es-SV")}] ${m}`;p.className=c;E.registroActividad.prepend(p)};
-function statKey(){return[S.symbol,S.strategy,S.mode,S.horizon].join("|")}function stat(){return S.stats[statKey()]??=( {tests:0,ok:0,fail:0})}function renderStats(){const x=stat(),p=x.tests?x.ok/x.tests*100:null;text(E.estadisticaIntentos,x.tests);text(E.estadisticaAciertos,x.ok);text(E.estadisticaFallos,x.fail);text(E.estadisticaPrecision,p==null?"NO DATA":`${p.toFixed(1)}%`);text(E.precisionObservada,`${x.ok} / ${x.tests} TESTS`)}
-function lock(v){[E.selectorEstrategia,E.selectorMercado,E.selectorModo,E.selectorHorizonte].forEach(x=>x&&(x.disabled=v))}
-function renderEngine(){text(E.textoEstadoMotor,S.engine?"ON":"OFF");E.estadoMotor?.classList.toggle("engine",S.engine);E.botonEncenderMotor&&(E.botonEncenderMotor.textContent=S.engine?"STOP ENGINE":"START ENGINE");E.botonPrediccion&&(E.botonPrediccion.disabled=!S.connected||!S.engine||S.prices.length<12);lock(S.engine)}
-function connection(state,label){S.connected=state==="live";text(E.textoEstadoConexion,label);E.estadoConexion.className=`status-pill ${state}`;E.botonConectar.disabled=S.connected||state==="connecting";E.botonDesconectar.disabled=!S.connected;E.botonEncenderMotor.disabled=!S.connected;if(!S.connected&&S.engine)stop(false)}
-function connect(){derivAPI.conectar(S.symbol)}function disconnect(){stop(false);derivAPI.desconectar()}
-function start(){if(!S.connected)return;S.engine=true;renderEngine();monitorOportunidades.establecerContexto({simbolo:S.symbol,mercado:markets[S.symbol],estrategia:S.strategy,modo:S.mode,horizonte:S.horizon});monitorOportunidades.iniciar();asistenteVoz.announceSearch(markets[S.symbol].replace("(1s)","de un segundo"),S.strategy);log("Engine started.","ok")}
-function stop(voice=true){S.engine=false;S.activeSignal=null;clearInterval(countTimer);monitorOportunidades.detener("Engine stopped.");renderEngine();if(voice)asistenteVoz.speak("Motor apagado")}
-function resetData(){S.prices=[];S.digits=[];S.ticks=0;S.last=null;text(E.precioActual,"--");text(E.contadorTicks,0);text(E.ultimoDigito,"--");E.listaUltimosDigitos.innerHTML="";renderEngine()}
-function tick(t){if(t.simbolo!==S.symbol)return;const p=Number(t.precio);if(!Number.isFinite(p))return;const dec=Number.isInteger(t.pipSize)?t.pipSize:2,formatted=p.toFixed(dec),d=Number(formatted.match(/(\d)(?!.*\d)/)?.[1]);if(E.precioActual){E.precioActual.classList.remove("sube","baja");if(S.last!=null)E.precioActual.classList.add(p>S.last?"sube":p<S.last?"baja":"")}S.last=p;S.pip=dec;S.ticks++;S.prices.push(p);if(S.prices.length>1000)S.prices.shift();if(Number.isInteger(d)){S.digits.push(d);if(S.digits.length>1000)S.digits.shift()}text(E.precioActual,formatted);text(E.contadorTicks,S.ticks);text(E.ultimoDigito,d);text(E.horaActualizacion,new Date((t.epoch||Date.now()/1000)*1000).toLocaleTimeString("es-SV"));text(E.estadoDatos,"LIVE DATA");text(E.estadoMemoria,S.prices.length);renderDigits();renderEngine();evaluate(p,d);if(S.engine)analyze(false)}
-function renderDigits(){E.listaUltimosDigitos.innerHTML="";S.digits.slice(-20).forEach((d,i,a)=>{const x=document.createElement("span");x.className="digit"+(i===a.length-1?" current":"");x.textContent=d;E.listaUltimosDigitos.appendChild(x)})}
-function analyze(force=false){if(!S.engine)return null;const now=Date.now();if(!force&&now-S.lastAnalysis<300)return null;S.lastAnalysis=now;const r=crearResumenTecnico({precios:S.prices,digitos:S.digits,modo:S.mode});renderIndicators(r);const pred=generarPrediccion({estrategia:S.strategy,resumen:r});renderScore(pred);monitorOportunidades.procesar(pred);return pred}
-function renderIndicators(r){text(E.tendencia,r.tendencia.direccion);text(E.detalleTendencia,`${r.tendencia.cambioPorcentual.toFixed(4)}%`);text(E.rsi,r.rsi==null?"--":r.rsi.toFixed(1));text(E.detalleRsi,r.interpretacionRsi.zona);text(E.momentum,r.momentum.direccion);text(E.detalleMomentum,`${r.momentum.porcentaje.toFixed(4)}%`);text(E.volatilidad,`${r.volatilidad.porcentaje.toFixed(4)}%`);text(E.detalleVolatilidad,r.volatilidad.nivel);const f=r.fibonacci;text(E.estadoFibonacci,f.disponible?f.estado:"NO DATA");text(E.detalleFibonacci,f.disponible?(f.cercaDeNivel?f.tipoZona:"No nearby level"):"Collecting prices");text(E.nivelFibonacciCercano,f.nivelCercano?`${f.nivelCercano.porcentaje}%`:"--");text(E.maximoFibonacci,f.disponible?f.maximo.toFixed(S.pip):"--");text(E.minimoFibonacci,f.disponible?f.minimo.toFixed(S.pip):"--")}
-function renderScore(r){text(E.puntajeSenal,`${r.puntaje}/100`);E.barraPuntaje.style.width=`${r.puntaje}%`;text(E.mensajeOperacion,`Signal Quality: ${clasificarPuntaje(r.puntaje,r.estrategia).nivel}`)}
-function reasons(r){E.listaMotivos.innerHTML="";[...(r.razones||[]),...(r.advertencias||[]).map(x=>`⚠ ${x}`)].forEach(t=>{const li=document.createElement("li");li.textContent=t;E.listaMotivos.appendChild(li)})}
-function visual(r){return r.direccion==="MATCH"?`MATCHES ${r.metadata?.digito}`:r.direccion}
-function panel(r,phase){E.panelSenal.className=`card signal-card ${phase==="CONFIRMED"?"confirmed":"prepare"}`;text(E.estadoPrediccion,phase);text(E.tituloPrediccion,phase==="CONFIRMED"?"Signal confirmed":phase==="REVALIDATING"?"Final revalidation":"Possible opportunity");text(E.valorPrediccion,visual(r));text(E.puntajeSenal,`${r.puntaje}/100`);E.barraPuntaje.style.width=`${r.puntaje}%`;reasons(r)}
-function toast(type,state,value,detail,ms=4000){clearTimeout(toastTimer);E.capsulaSenal.className=`signal-toast ${type} visible`;text(E.estadoCapsula,state);text(E.valorCapsula,value);text(E.detalleCapsula,detail);toastTimer=setTimeout(()=>E.capsulaSenal.classList.remove("visible"),ms)}
-function monitorState(d){text(E.textoEstadoMonitoreo,d.estado);text(E.tituloMonitoreo,{INACTIVE:"MONITORING INACTIVE",MONITORING:"SEARCHING ENTRY",CANDIDATE:"VALIDATING ENTRY",PREPARE:"PREPARE",REVALIDATING:"REVALIDATING",CONFIRMED:"CONFIRMED",EXECUTING:"EXECUTE NOW",RESULT:"RESULT",CANCELLED:"CANCELLED"}[d.estado]);text(E.detalleMonitoreo,d.mensaje);const progress={INACTIVE:0,MONITORING:18,CANDIDATE:42,PREPARE:68,REVALIDATING:86,CONFIRMED:100,EXECUTING:100,RESULT:100,CANCELLED:0}[d.estado]||0;E.barraProgresoMotor.style.width=`${progress}%`;[E.pasoSearch,E.pasoValidate,E.pasoPrepare,E.pasoExecute].forEach(x=>x.classList.remove("active"));if(progress>=18)E.pasoSearch.classList.add("active");if(progress>=42)E.pasoValidate.classList.add("active");if(progress>=68)E.pasoPrepare.classList.add("active");if(progress>=100)E.pasoExecute.classList.add("active");E.botonCancelarMonitoreo.hidden=![ESTADOS_MONITOR.PREPARE,ESTADOS_MONITOR.REVALIDATING].includes(d.estado)}
-function prepare({resultado:r}){panel(r,"PREPARE");toast("prepare","PREPARE",visual(r),"Prepare the bot. Waiting for final validation.",5000);asistenteVoz.prepare(r)}
-function revalidate({resultado:r}){panel(r,"REVALIDATING");toast("prepare","REVALIDATING",visual(r),"Checking latest ticks.",2500);asistenteVoz.revalidate(r)}
-function confirm({resultado:r}){S.activeSignal={r,price:S.last,tick:S.ticks,time:Date.now(),done:false};panel(r,"CONFIRMED");toast("confirmed","EXECUTE NOW",visual(r),"Signal locked. Execute now.",6000);asistenteVoz.confirm(r);monitorOportunidades.marcarEjecutando();countdown(r)}
-function cancel({motivo,r}){S.activeSignal=null;clearInterval(countTimer);toast("cancelled","CANCELLED",r?visual(r):"WAIT",motivo,3200);asistenteVoz.cancel()}
-function result({acierto,resultado:r}){clearInterval(countTimer);const x=stat();x.tests++;acierto?x.ok++:x.fail++;renderStats();E.panelSenal.className=`card signal-card ${acierto?"confirmed":"failed"}`;text(E.estadoPrediccion,acierto?"SUCCESS":"FAILED");text(E.tituloPrediccion,acierto?"Prediction successful":"Prediction failed");text(E.valorPrediccion,visual(r));text(E.cuentaRegresiva,acierto?"✓":"×");toast(acierto?"confirmed":"failed",acierto?"SUCCESS":"FAILED",visual(r),acierto?"Prediction successful.":"Prediction failed.",4500);asistenteVoz.result(acierto);S.activeSignal=null}
-function seconds(){return S.horizon==="1m"?60:S.horizon==="2m"?120:S.horizon==="5m"?300:10}
-function countdown(r){clearInterval(countTimer);let n=r.estrategia==="rise_fall"?seconds():10;text(E.cuentaRegresiva,n);countTimer=setInterval(()=>{n--;text(E.cuentaRegresiva,Math.max(0,n));if(n<=0)clearInterval(countTimer)},1000)}
-function evaluate(p,d){const s=S.activeSignal;if(!s||s.done)return;const r=s.r,ticks=S.ticks-s.tick;if(r.estrategia==="even_odd"&&ticks>=1)finish(r.direccion==="EVEN"?d%2===0:d%2!==0,{d});else if(r.estrategia==="over_under"&&ticks>=1)finish(r.direccion==="OVER"?d>=5:d<=4,{d});else if(r.estrategia==="match"&&ticks>=1){if(d===r.metadata.digito)finish(true,{d,ticks});else if(ticks>=5)finish(false,{d,ticks})}else if(r.estrategia==="rise_fall"&&Date.now()-s.time>=seconds()*1000)finish(r.direccion==="RISE"?p>s.price:p<s.price,{start:s.price,end:p})}
-function finish(ok,data){S.activeSignal.done=true;monitorOportunidades.registrarResultado({acierto:ok,datos:data})}
-function manual(){const r=analyze(true);if(!r)return;toast(r.direccion==="WAIT"?"cancelled":"prepare","MANUAL ANALYSIS",visual(r),crearTextoOperacion(r),4800);reasons(r);asistenteVoz.manual(r)}
-async function init(){await asistenteVoz.init();(asistenteVoz.voices||[]).forEach(v=>{const o=document.createElement("option");o.value=`${v.name}|${v.lang}`;o.textContent=`${v.name} · ${v.lang}`;E.selectorVoz.appendChild(o)});renderStats();renderEngine();text(E.nombreMercado,markets[S.symbol]);log("Trading Analyst V9 Pro MR ready.","ok")}
-E.botonConectar.onclick=connect;E.botonDesconectar.onclick=disconnect;E.botonEncenderMotor.onclick=()=>S.engine?stop():start();E.botonPrediccion.onclick=manual;E.selectorMercado.onchange=()=>{S.symbol=E.selectorMercado.value;text(E.nombreMercado,markets[S.symbol]);resetData();renderStats();if(S.connected)derivAPI.cambiarSimbolo(S.symbol)};E.selectorEstrategia.onchange=()=>{S.strategy=E.selectorEstrategia.value;renderStats()};E.selectorModo.onchange=()=>{S.mode=E.selectorModo.value;renderStats()};E.selectorHorizonte.onchange=()=>{S.horizon=E.selectorHorizonte.value;renderStats()};E.botonCancelarMonitoreo.onclick=()=>monitorOportunidades.cancelarOportunidad("Cancelled manually.");E.botonVoz.onclick=()=>{const a=asistenteVoz.toggle();text(E.botonVoz,a?"🔊":"🔇")};E.velocidadVoz.oninput=()=>{asistenteVoz.setRate(E.velocidadVoz.value);text(E.valorVelocidad,`${Number(E.velocidadVoz.value).toFixed(2)}x`)};E.selectorVoz.onchange=()=>asistenteVoz.select(E.selectorVoz.value);E.botonProbarVoz.onclick=()=>asistenteVoz.test();E.botonReiniciarEstadisticas.onclick=()=>{S.stats[statKey()]={tests:0,ok:0,fail:0};renderStats()};E.botonLimpiarRegistro.onclick=()=>E.registroActividad.innerHTML="";
-derivAPI.al("estado",d=>connection(d.estado,d.texto));derivAPI.al("tick",tick);derivAPI.al("error",d=>log(d.mensaje,"error"));monitorOportunidades.al("estado",monitorState);monitorOportunidades.al("prepare",prepare);monitorOportunidades.al("revalidando",revalidate);monitorOportunidades.al("confirmado",confirm);monitorOportunidades.al("cancelado",cancel);monitorOportunidades.al("resultado",result);init();
+/*
+=========================================================
+TRADING ANALYST PRO MR
+APP DE DIAGNÓSTICO DE CONEXIÓN
+=========================================================
+*/
+
+const botonConectar =
+  document.getElementById("botonConectar");
+
+const botonDesconectar =
+  document.getElementById("botonDesconectar");
+
+const botonEncenderMotor =
+  document.getElementById("botonEncenderMotor");
+
+const botonPrediccion =
+  document.getElementById("botonPrediccion");
+
+const selectorMercado =
+  document.getElementById("selectorMercado");
+
+const estadoConexion =
+  document.getElementById("estadoConexion");
+
+const textoEstadoConexion =
+  document.getElementById("textoEstadoConexion");
+
+const precioActual =
+  document.getElementById("precioActual");
+
+const contadorTicks =
+  document.getElementById("contadorTicks");
+
+const ultimoDigito =
+  document.getElementById("ultimoDigito");
+
+const horaActualizacion =
+  document.getElementById("horaActualizacion");
+
+const estadoDatos =
+  document.getElementById("estadoDatos");
+
+const estadoMemoria =
+  document.getElementById("estadoMemoria");
+
+const nombreMercado =
+  document.getElementById("nombreMercado");
+
+const listaUltimosDigitos =
+  document.getElementById("listaUltimosDigitos");
+
+const registroActividad =
+  document.getElementById("registroActividad");
+
+const mensajeControl =
+  document.getElementById("mensajeControl");
+
+
+const URL_DERIV =
+  "wss://ws.derivws.com/websockets/v3?app_id=1089";
+
+
+const NOMBRES_MERCADOS = {
+  "1HZ10V": "Volatility 10 (1s) Index",
+  "1HZ25V": "Volatility 25 (1s) Index",
+  "1HZ50V": "Volatility 50 (1s) Index",
+  "1HZ75V": "Volatility 75 (1s) Index",
+  "1HZ100V": "Volatility 100 (1s) Index",
+  "R_10": "Volatility 10 Index",
+  "R_25": "Volatility 25 Index",
+  "R_50": "Volatility 50 Index",
+  "R_75": "Volatility 75 Index",
+  "R_100": "Volatility 100 Index"
+};
+
+
+let socket = null;
+let idSuscripcion = null;
+let cantidadTicks = 0;
+let digitos = [];
+
+
+/* =====================================================
+UTILIDADES
+===================================================== */
+
+function establecerTexto(elemento, texto) {
+  if (elemento) {
+    elemento.textContent = String(texto);
+  }
+}
+
+
+function registrar(mensaje, tipo = "") {
+  if (!registroActividad) {
+    return;
+  }
+
+  const linea =
+    document.createElement("p");
+
+  linea.textContent =
+    `[${new Date().toLocaleTimeString("es-SV")}] ${mensaje}`;
+
+  if (tipo) {
+    linea.className = tipo;
+  }
+
+  registroActividad.prepend(linea);
+}
+
+
+function cambiarEstado(estado, texto) {
+  establecerTexto(
+    textoEstadoConexion,
+    texto
+  );
+
+  if (estadoConexion) {
+    estadoConexion.className =
+      `status-pill ${estado}`;
+  }
+
+  if (botonConectar) {
+    botonConectar.disabled =
+      estado === "connecting" ||
+      estado === "live";
+  }
+
+  if (botonDesconectar) {
+    botonDesconectar.disabled =
+      estado !== "live";
+  }
+
+  if (botonEncenderMotor) {
+    botonEncenderMotor.disabled =
+      estado !== "live";
+  }
+}
+
+
+function obtenerUltimoDigito(
+  precio,
+  decimales
+) {
+  const texto =
+    Number(precio).toFixed(decimales);
+
+  const coincidencia =
+    texto.match(/(\d)(?!.*\d)/);
+
+  return coincidencia
+    ? Number(coincidencia[1])
+    : null;
+}
+
+
+function mostrarDigitos() {
+  if (!listaUltimosDigitos) {
+    return;
+  }
+
+  listaUltimosDigitos.innerHTML = "";
+
+  digitos.slice(-20).forEach(
+    (digito, indice, lista) => {
+      const elemento =
+        document.createElement("span");
+
+      elemento.className =
+        "digit";
+
+      if (
+        indice ===
+        lista.length - 1
+      ) {
+        elemento.classList.add(
+          "current"
+        );
+      }
+
+      elemento.textContent =
+        String(digito);
+
+      listaUltimosDigitos.appendChild(
+        elemento
+      );
+    }
+  );
+}
+
+
+/* =====================================================
+CONEXIÓN
+===================================================== */
+
+function conectar() {
+  const simbolo =
+    selectorMercado?.value ||
+    "1HZ100V";
+
+  if (
+    socket &&
+    (
+      socket.readyState === WebSocket.OPEN ||
+      socket.readyState === WebSocket.CONNECTING
+    )
+  ) {
+    registrar(
+      "Ya existe una conexión activa.",
+      "warn"
+    );
+
+    return;
+  }
+
+  cambiarEstado(
+    "connecting",
+    "CONNECTING"
+  );
+
+  establecerTexto(
+    mensajeControl,
+    `Conectando con ${NOMBRES_MERCADOS[simbolo]}...`
+  );
+
+  registrar(
+    `Intentando conectar con ${simbolo}.`
+  );
+
+  try {
+    socket =
+      new WebSocket(URL_DERIV);
+  } catch (error) {
+    cambiarEstado(
+      "offline",
+      "OFFLINE"
+    );
+
+    registrar(
+      `No se pudo crear el WebSocket: ${error.message}`,
+      "error"
+    );
+
+    return;
+  }
+
+
+  socket.onopen = () => {
+    cambiarEstado(
+      "live",
+      "LIVE"
+    );
+
+    establecerTexto(
+      mensajeControl,
+      "Conectado. Recibiendo precios en tiempo real."
+    );
+
+    registrar(
+      "WebSocket conectado correctamente.",
+      "ok"
+    );
+
+    socket.send(
+      JSON.stringify({
+        ticks: simbolo,
+        subscribe: 1
+      })
+    );
+  };
+
+
+  socket.onmessage = evento => {
+    let datos;
+
+    try {
+      datos =
+        JSON.parse(evento.data);
+    } catch (error) {
+      registrar(
+        "No se pudo interpretar una respuesta.",
+        "error"
+      );
+
+      return;
+    }
+
+
+    if (datos.error) {
+      registrar(
+        `Deriv: ${datos.error.message}`,
+        "error"
+      );
+
+      return;
+    }
+
+
+    if (datos.subscription?.id) {
+      idSuscripcion =
+        datos.subscription.id;
+    }
+
+
+    if (!datos.tick) {
+      return;
+    }
+
+
+    const precio =
+      Number(datos.tick.quote);
+
+    const decimales =
+      Number.isInteger(
+        Number(datos.tick.pip_size)
+      )
+        ? Number(datos.tick.pip_size)
+        : 2;
+
+    const digito =
+      obtenerUltimoDigito(
+        precio,
+        decimales
+      );
+
+
+    cantidadTicks++;
+
+    if (Number.isInteger(digito)) {
+      digitos.push(digito);
+
+      if (digitos.length > 100) {
+        digitos.shift();
+      }
+    }
+
+
+    establecerTexto(
+      precioActual,
+      precio.toFixed(decimales)
+    );
+
+    establecerTexto(
+      contadorTicks,
+      cantidadTicks
+    );
+
+    establecerTexto(
+      ultimoDigito,
+      Number.isInteger(digito)
+        ? digito
+        : "--"
+    );
+
+    establecerTexto(
+      horaActualizacion,
+      new Date(
+        Number(datos.tick.epoch) * 1000
+      ).toLocaleTimeString("es-SV")
+    );
+
+    establecerTexto(
+      estadoDatos,
+      "LIVE DATA"
+    );
+
+    establecerTexto(
+      estadoMemoria,
+      cantidadTicks
+    );
+
+    mostrarDigitos();
+  };
+
+
+  socket.onerror = () => {
+    registrar(
+      "El navegador informó un error de WebSocket.",
+      "error"
+    );
+  };
+
+
+  socket.onclose = evento => {
+    cambiarEstado(
+      "offline",
+      "OFFLINE"
+    );
+
+    establecerTexto(
+      mensajeControl,
+      "La conexión fue cerrada."
+    );
+
+    registrar(
+      `Conexión cerrada. Código ${evento.code}.`,
+      "warn"
+    );
+
+    socket = null;
+    idSuscripcion = null;
+  };
+}
+
+
+function desconectar() {
+  if (
+    socket &&
+    socket.readyState === WebSocket.OPEN &&
+    idSuscripcion
+  ) {
+    socket.send(
+      JSON.stringify({
+        forget: idSuscripcion
+      })
+    );
+  }
+
+  if (socket) {
+    socket.close(
+      1000,
+      "Cierre manual"
+    );
+  }
+
+  socket = null;
+  idSuscripcion = null;
+
+  cambiarEstado(
+    "offline",
+    "OFFLINE"
+  );
+
+  establecerTexto(
+    mensajeControl,
+    "Herramienta desconectada."
+  );
+}
+
+
+/* =====================================================
+CAMBIO DE MERCADO
+===================================================== */
+
+function cambiarMercado() {
+  const simbolo =
+    selectorMercado?.value ||
+    "1HZ100V";
+
+  establecerTexto(
+    nombreMercado,
+    NOMBRES_MERCADOS[simbolo]
+  );
+
+  cantidadTicks = 0;
+  digitos = [];
+
+  establecerTexto(
+    precioActual,
+    "--"
+  );
+
+  establecerTexto(
+    contadorTicks,
+    "0"
+  );
+
+  establecerTexto(
+    ultimoDigito,
+    "--"
+  );
+
+  mostrarDigitos();
+
+  if (
+    socket &&
+    socket.readyState === WebSocket.OPEN
+  ) {
+    desconectar();
+
+    setTimeout(
+      conectar,
+      500
+    );
+  }
+}
+
+
+/* =====================================================
+EVENTOS
+===================================================== */
+
+if (botonConectar) {
+  botonConectar.addEventListener(
+    "click",
+    conectar
+  );
+}
+
+
+if (botonDesconectar) {
+  botonDesconectar.addEventListener(
+    "click",
+    desconectar
+  );
+}
+
+
+if (selectorMercado) {
+  selectorMercado.addEventListener(
+    "change",
+    cambiarMercado
+  );
+}
+
+
+/* =====================================================
+INICIO
+===================================================== */
+
+cambiarEstado(
+  "offline",
+  "OFFLINE"
+);
+
+cambiarMercado();
+
+establecerTexto(
+  mensajeControl,
+  "Versión de diagnóstico lista. Pulse CONNECT."
+);
+
+if (botonPrediccion) {
+  botonPrediccion.disabled = true;
+}
+
+registrar(
+  "APP DE DIAGNÓSTICO INICIADA.",
+  "ok"
+);
