@@ -9,24 +9,23 @@ Versión de caché:
 Todos los archivos están en la carpeta principal.
 =========================================================
 */
-
 const NOMBRE_CACHE =
-  "trading-analyst-pro-mr-9.1.3";
-
+"trading-analyst-pro-mr-9.1.4";
 
 const ARCHIVOS = [
   "./",
   "./index.html",
-  "./style.css?v=9.1.2",
-  "./app.js?v=9.1.2",
+  "./style.css?v=9.1.4",
+  "./app.js?v=9.1.4",
   "./deriv-api.js",
   "./indicators.js",
   "./prediction.js",
   "./monitor.js",
   "./voice.js",
-  "./manifest.webmanifest?v=9.1.2",
-  "./icon.svg?v=9.1.2"
+  "./manifest.webmanifest?v=9.1.4",
+  "./icon.svg?v=9.1.4"
 ];
+
 
 
 /* =====================================================
