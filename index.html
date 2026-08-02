@@ -1,178 +1,970 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#06111b">
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, viewport-fit=cover"
+  >
+
+  <meta
+    name="theme-color"
+    content="#06111b"
+  >
+
+  <meta
+    name="description"
+    content="Trading Analyst Pro MR - Herramienta de análisis técnico para mercados sintéticos."
+  >
+
   <title>Trading Analyst Pro MR</title>
-  <link rel="manifest" href="./manifest.webmanifest">
-  <link rel="icon" href="./assets/icon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="./css/style.css?v=9.1.0">
+
+  <!-- Todos los archivos están en la carpeta principal -->
+  <link
+    rel="manifest"
+    href="./manifest.webmanifest?v=9.1.2"
+  >
+
+  <link
+    rel="icon"
+    href="./icon.svg?v=9.1.2"
+    type="image/svg+xml"
+  >
+
+  <link
+    rel="stylesheet"
+    href="./style.css?v=9.1.2"
+  >
 </head>
+
 <body>
+
   <main class="app-shell">
+
+    <!-- ==================================================
+    ENCABEZADO
+    =================================================== -->
+
     <header class="hero">
+
       <div class="brand">
-        <div class="logo">MR</div>
-        <div>
-          <p class="eyebrow">PRECISION ENTRIES · LIVE ANALYSIS</p>
-          <h1>TRADING ANALYST <span>PRO MR</span></h1>
+
+        <div class="logo">
+          MR
         </div>
+
+        <div>
+
+          <p class="eyebrow">
+            PRECISION ENTRIES · LIVE ANALYSIS
+          </p>
+
+          <h1>
+            TRADING ANALYST
+            <span>PRO MR</span>
+          </h1>
+
+        </div>
+
       </div>
+
+
       <div class="status-row">
-        <div id="estadoConexion" class="status-pill offline"><span class="dot"></span><b id="textoEstadoConexion">OFFLINE</b></div>
-        <div id="estadoMotor" class="status-pill"><span>⚡</span><b id="textoEstadoMotor">OFF</b></div>
-        <div class="status-pill"><span>↯</span><b id="estadoMemoria">0</b></div>
+
+        <div
+          id="estadoConexion"
+          class="status-pill offline"
+        >
+          <span class="dot"></span>
+
+          <b id="textoEstadoConexion">
+            OFFLINE
+          </b>
+        </div>
+
+
+        <div
+          id="estadoMotor"
+          class="status-pill"
+        >
+          <span>⚡</span>
+
+          <b id="textoEstadoMotor">
+            OFF
+          </b>
+        </div>
+
+
+        <div class="status-pill">
+
+          <span>↯</span>
+
+          <b id="estadoMemoria">
+            0
+          </b>
+
+        </div>
+
       </div>
+
     </header>
 
+
+    <!-- ==================================================
+    CONTROLES
+    =================================================== -->
+
     <section class="card controls">
+
       <div class="grid-2">
-        <label>Strategy
+
+        <label>
+          Estrategia
+
           <select id="selectorEstrategia">
-            <option value="rise_fall">Rise / Fall</option>
-            <option value="even_odd">Even / Odd</option>
-            <option value="over_under">Over / Under</option>
-            <option value="match">Matches</option>
+
+            <option value="rise_fall">
+              Rise / Fall
+            </option>
+
+            <option value="even_odd">
+              Even / Odd
+            </option>
+
+            <option value="over_under">
+              Over / Under
+            </option>
+
+            <option value="match">
+              Matches
+            </option>
+
           </select>
         </label>
-        <label>Market
+
+
+        <label>
+          Mercado
+
           <select id="selectorMercado">
-            <option value="1HZ10V">Volatility 10 (1s)</option>
-            <option value="1HZ25V">Volatility 25 (1s)</option>
-            <option value="1HZ50V">Volatility 50 (1s)</option>
-            <option value="1HZ75V">Volatility 75 (1s)</option>
-            <option value="1HZ100V" selected>Volatility 100 (1s)</option>
-            <option value="R_10">Volatility 10 Index</option>
-            <option value="R_25">Volatility 25 Index</option>
-            <option value="R_50">Volatility 50 Index</option>
-            <option value="R_75">Volatility 75 Index</option>
-            <option value="R_100">Volatility 100 Index</option>
+
+            <option value="1HZ10V">
+              Volatility 10 (1s)
+            </option>
+
+            <option value="1HZ25V">
+              Volatility 25 (1s)
+            </option>
+
+            <option value="1HZ50V">
+              Volatility 50 (1s)
+            </option>
+
+            <option value="1HZ75V">
+              Volatility 75 (1s)
+            </option>
+
+            <option
+              value="1HZ100V"
+              selected
+            >
+              Volatility 100 (1s)
+            </option>
+
+            <option value="R_10">
+              Volatility 10 Index
+            </option>
+
+            <option value="R_25">
+              Volatility 25 Index
+            </option>
+
+            <option value="R_50">
+              Volatility 50 Index
+            </option>
+
+            <option value="R_75">
+              Volatility 75 Index
+            </option>
+
+            <option value="R_100">
+              Volatility 100 Index
+            </option>
+
           </select>
         </label>
-        <label>Mode
+
+
+        <label>
+          Modo de análisis
+
           <select id="selectorModo">
-            <option value="fast">Fast</option>
-            <option value="complete">Complete</option>
+
+            <option value="fast">
+              Rápido
+            </option>
+
+            <option value="complete">
+              Completo
+            </option>
+
           </select>
         </label>
-        <label>Horizon
+
+
+        <label>
+          Tiempo de operación
+
           <select id="selectorHorizonte">
-            <option value="10s">10 seconds</option>
-            <option value="1m">1 minute</option>
-            <option value="2m">2 minutes</option>
-            <option value="5m">5 minutes</option>
+
+            <option value="10s">
+              10 segundos
+            </option>
+
+            <option value="1m">
+              1 minuto
+            </option>
+
+            <option value="2m">
+              2 minutos
+            </option>
+
+            <option value="5m">
+              5 minutos
+            </option>
+
           </select>
         </label>
+
       </div>
+
+
       <div class="button-grid">
-        <button id="botonConectar" class="primary">CONNECT</button>
-        <button id="botonDesconectar" class="ghost" disabled>DISCONNECT</button>
-        <button id="botonEncenderMotor" class="primary" disabled>START ENGINE</button>
-        <button id="botonPrediccion" class="accent" disabled>PREDICTION</button>
+
+        <button
+          id="botonConectar"
+          class="primary"
+          type="button"
+        >
+          CONNECT
+        </button>
+
+
+        <button
+          id="botonDesconectar"
+          class="ghost"
+          type="button"
+          disabled
+        >
+          DISCONNECT
+        </button>
+
+
+        <button
+          id="botonEncenderMotor"
+          class="primary"
+          type="button"
+          disabled
+        >
+          START ENGINE
+        </button>
+
+
+        <button
+          id="botonPrediccion"
+          class="accent"
+          type="button"
+          disabled
+        >
+          PREDICTION
+        </button>
+
       </div>
-      <p id="mensajeControl" class="helper">Select market and strategy, then connect.</p>
+
+
+      <p
+        id="mensajeControl"
+        class="helper"
+      >
+        Seleccione el mercado y la estrategia. Después conecte la herramienta.
+      </p>
+
     </section>
 
-    <section id="panelMonitoreo" class="card monitor monitoring">
+
+    <!-- ==================================================
+    MOTOR DE OPORTUNIDADES
+    =================================================== -->
+
+    <section
+      id="panelMonitoreo"
+      class="card monitor monitoring"
+    >
+
       <div class="monitor-head">
+
         <div>
-          <p class="eyebrow">OPPORTUNITY ENGINE</p>
-          <h2 id="tituloMonitoreo">MONITORING INACTIVE</h2>
+
+          <p class="eyebrow">
+            OPPORTUNITY ENGINE
+          </p>
+
+          <h2 id="tituloMonitoreo">
+            MONITORING INACTIVE
+          </h2>
+
         </div>
-        <div id="estadoMonitoreo" class="mini-pill"><span id="textoEstadoMonitoreo">INACTIVE</span></div>
+
+
+        <div
+          id="estadoMonitoreo"
+          class="mini-pill"
+        >
+          <span id="textoEstadoMonitoreo">
+            INACTIVE
+          </span>
+        </div>
+
       </div>
-      <p id="detalleMonitoreo">Waiting for engine.</p>
-      <div class="progress-track"><div id="barraProgresoMotor"></div></div>
+
+
+      <p id="detalleMonitoreo">
+        Esperando que se encienda el motor.
+      </p>
+
+
+      <div class="progress-track">
+
+        <div id="barraProgresoMotor"></div>
+
+      </div>
+
+
       <div class="stage-row">
-        <span id="pasoSearch">SEARCH</span><span id="pasoValidate">VALIDATE</span><span id="pasoPrepare">PREPARE</span><span id="pasoExecute">EXECUTE</span>
+
+        <span id="pasoSearch">
+          SEARCH
+        </span>
+
+        <span id="pasoValidate">
+          VALIDATE
+        </span>
+
+        <span id="pasoPrepare">
+          PREPARE
+        </span>
+
+        <span id="pasoExecute">
+          EXECUTE
+        </span>
+
       </div>
-      <button id="botonCancelarMonitoreo" class="danger small" hidden>CANCEL OPPORTUNITY</button>
+
+
+      <button
+        id="botonCancelarMonitoreo"
+        class="danger small"
+        type="button"
+        hidden
+      >
+        CANCELAR OPORTUNIDAD
+      </button>
+
     </section>
+
+
+    <!-- ==================================================
+    DATOS DEL MERCADO
+    =================================================== -->
 
     <section class="card market-data">
+
       <div class="section-head">
+
         <div>
-          <p class="eyebrow">LIVE MARKET</p>
-          <h2 id="nombreMercado">Volatility 100 (1s) Index</h2>
+
+          <p class="eyebrow">
+            LIVE MARKET
+          </p>
+
+          <h2 id="nombreMercado">
+            Volatility 100 (1s) Index
+          </h2>
+
         </div>
-        <span id="estadoDatos" class="mini-pill">NO DATA</span>
+
+
+        <span
+          id="estadoDatos"
+          class="mini-pill"
+        >
+          NO DATA
+        </span>
+
       </div>
+
+
       <div class="metrics">
-        <article><small>PRICE</small><strong id="precioActual">--</strong></article>
-        <article><small>TICKS</small><strong id="contadorTicks">0</strong></article>
-        <article><small>LAST DIGIT</small><strong id="ultimoDigito">--</strong></article>
-        <article><small>TIME</small><strong id="horaActualizacion">--</strong></article>
+
+        <article>
+
+          <small>
+            PRECIO
+          </small>
+
+          <strong id="precioActual">
+            --
+          </strong>
+
+        </article>
+
+
+        <article>
+
+          <small>
+            TICKS
+          </small>
+
+          <strong id="contadorTicks">
+            0
+          </strong>
+
+        </article>
+
+
+        <article>
+
+          <small>
+            ÚLTIMO DÍGITO
+          </small>
+
+          <strong id="ultimoDigito">
+            --
+          </strong>
+
+        </article>
+
+
+        <article>
+
+          <small>
+            HORA
+          </small>
+
+          <strong id="horaActualizacion">
+            --
+          </strong>
+
+        </article>
+
       </div>
-      <div id="listaUltimosDigitos" class="digits"><span class="muted">Waiting for data</span></div>
+
+
+      <div
+        id="listaUltimosDigitos"
+        class="digits"
+      >
+        <span class="muted">
+          Esperando datos del mercado
+        </span>
+      </div>
+
     </section>
 
-    <section class="card signal-card monitoring" id="panelSenal">
+
+    <!-- ==================================================
+    PANEL DE PREDICCIÓN
+    =================================================== -->
+
+    <section
+      id="panelSenal"
+      class="card signal-card monitoring"
+    >
+
       <div class="section-head">
+
         <div>
-          <p class="eyebrow">SIGNAL</p>
-          <h2 id="tituloPrediccion">Waiting for opportunity</h2>
+
+          <p class="eyebrow">
+            SIGNAL
+          </p>
+
+          <h2 id="tituloPrediccion">
+            Esperando oportunidad
+          </h2>
+
         </div>
-        <span id="estadoPrediccion" class="mini-pill">MONITORING</span>
+
+
+        <span
+          id="estadoPrediccion"
+          class="mini-pill"
+        >
+          MONITORING
+        </span>
+
       </div>
-      <div class="signal-value" id="valorPrediccion">--</div>
-      <div class="score-row"><span>Signal Score</span><b id="puntajeSenal">0/100</b></div>
-      <div class="score-track"><div id="barraPuntaje"></div></div>
-      <div class="countdown" id="cuentaRegresiva">--</div>
-      <p id="mensajeOperacion">No active signal.</p>
-      <ul id="listaMotivos"><li>Engine has not generated a signal yet.</li></ul>
+
+
+      <div
+        id="valorPrediccion"
+        class="signal-value"
+      >
+        --
+      </div>
+
+
+      <div class="score-row">
+
+        <span>
+          Signal Score
+        </span>
+
+        <b id="puntajeSenal">
+          0/100
+        </b>
+
+      </div>
+
+
+      <div class="score-track">
+
+        <div id="barraPuntaje"></div>
+
+      </div>
+
+
+      <div
+        id="cuentaRegresiva"
+        class="countdown"
+      >
+        --
+      </div>
+
+
+      <p id="mensajeOperacion">
+        No existe una señal activa.
+      </p>
+
+
+      <ul id="listaMotivos">
+
+        <li>
+          El motor todavía no ha generado una señal.
+        </li>
+
+      </ul>
+
     </section>
+
+
+    <!-- ==================================================
+    INDICADORES
+    =================================================== -->
 
     <section class="card indicators">
-      <div class="section-head"><div><p class="eyebrow">TECHNICAL FILTERS</p><h2>Indicators</h2></div></div>
+
+      <div class="section-head">
+
+        <div>
+
+          <p class="eyebrow">
+            TECHNICAL FILTERS
+          </p>
+
+          <h2>
+            Indicadores
+          </h2>
+
+        </div>
+
+      </div>
+
+
       <div class="metrics">
-        <article><small>TREND</small><strong id="tendencia">--</strong><p id="detalleTendencia">Waiting</p></article>
-        <article><small>RSI</small><strong id="rsi">--</strong><p id="detalleRsi">Waiting</p></article>
-        <article><small>MOMENTUM</small><strong id="momentum">--</strong><p id="detalleMomentum">Waiting</p></article>
-        <article><small>VOLATILITY</small><strong id="volatilidad">--</strong><p id="detalleVolatilidad">Waiting</p></article>
+
+        <article>
+
+          <small>
+            TENDENCIA
+          </small>
+
+          <strong id="tendencia">
+            --
+          </strong>
+
+          <p id="detalleTendencia">
+            Esperando datos
+          </p>
+
+        </article>
+
+
+        <article>
+
+          <small>
+            RSI
+          </small>
+
+          <strong id="rsi">
+            --
+          </strong>
+
+          <p id="detalleRsi">
+            Esperando datos
+          </p>
+
+        </article>
+
+
+        <article>
+
+          <small>
+            MOMENTUM
+          </small>
+
+          <strong id="momentum">
+            --
+          </strong>
+
+          <p id="detalleMomentum">
+            Esperando datos
+          </p>
+
+        </article>
+
+
+        <article>
+
+          <small>
+            VOLATILIDAD
+          </small>
+
+          <strong id="volatilidad">
+            --
+          </strong>
+
+          <p id="detalleVolatilidad">
+            Esperando datos
+          </p>
+
+        </article>
+
       </div>
+
+
       <div class="fib-box">
-        <div><small>FIBONACCI</small><strong id="estadoFibonacci">NO DATA</strong></div>
-        <p id="detalleFibonacci">Collecting prices.</p>
-        <div class="fib-stats"><span>Nearest <b id="nivelFibonacciCercano">--</b></span><span>High <b id="maximoFibonacci">--</b></span><span>Low <b id="minimoFibonacci">--</b></span></div>
+
+        <div>
+
+          <small>
+            FIBONACCI
+          </small>
+
+          <strong id="estadoFibonacci">
+            NO DATA
+          </strong>
+
+        </div>
+
+
+        <p id="detalleFibonacci">
+          Recopilando precios.
+        </p>
+
+
+        <div class="fib-stats">
+
+          <span>
+            Nivel cercano
+            <b id="nivelFibonacciCercano">
+              --
+            </b>
+          </span>
+
+
+          <span>
+            Máximo
+            <b id="maximoFibonacci">
+              --
+            </b>
+          </span>
+
+
+          <span>
+            Mínimo
+            <b id="minimoFibonacci">
+              --
+            </b>
+          </span>
+
+        </div>
+
       </div>
+
     </section>
+
+
+    <!-- ==================================================
+    ESTADÍSTICAS
+    =================================================== -->
 
     <section class="card stats">
-      <div class="section-head"><div><p class="eyebrow">OBSERVED PERFORMANCE</p><h2>Current setup only</h2></div></div>
-      <div class="metrics">
-        <article><small>TESTS</small><strong id="estadisticaIntentos">0</strong></article>
-        <article><small>SUCCESS</small><strong id="estadisticaAciertos">0</strong></article>
-        <article><small>FAILED</small><strong id="estadisticaFallos">0</strong></article>
-        <article><small>ACCURACY</small><strong id="estadisticaPrecision">NO DATA</strong></article>
+
+      <div class="section-head">
+
+        <div>
+
+          <p class="eyebrow">
+            OBSERVED PERFORMANCE
+          </p>
+
+          <h2>
+            Configuración actual
+          </h2>
+
+        </div>
+
       </div>
-      <p id="precisionObservada" class="helper">0 / 0 TESTS</p>
-      <button id="botonReiniciarEstadisticas" class="ghost small">RESET CURRENT STATS</button>
+
+
+      <div class="metrics">
+
+        <article>
+
+          <small>
+            PRUEBAS
+          </small>
+
+          <strong id="estadisticaIntentos">
+            0
+          </strong>
+
+        </article>
+
+
+        <article>
+
+          <small>
+            ACIERTOS
+          </small>
+
+          <strong id="estadisticaAciertos">
+            0
+          </strong>
+
+        </article>
+
+
+        <article>
+
+          <small>
+            FALLOS
+          </small>
+
+          <strong id="estadisticaFallos">
+            0
+          </strong>
+
+        </article>
+
+
+        <article>
+
+          <small>
+            PRECISIÓN
+          </small>
+
+          <strong id="estadisticaPrecision">
+            NO DATA
+          </strong>
+
+        </article>
+
+      </div>
+
+
+      <p
+        id="precisionObservada"
+        class="helper"
+      >
+        0 / 0 TESTS
+      </p>
+
+
+      <button
+        id="botonReiniciarEstadisticas"
+        class="ghost small"
+        type="button"
+      >
+        REINICIAR ESTADÍSTICAS
+      </button>
+
     </section>
+
+
+    <!-- ==================================================
+    VOZ
+    =================================================== -->
 
     <section class="card voice">
-      <div class="section-head"><div><p class="eyebrow">VOICE ASSISTANT</p><h2>Spanish alerts</h2></div><button id="botonVoz" class="icon-button">🔊</button></div>
-      <div class="grid-2">
-        <label>Voice<select id="selectorVoz"></select></label>
-        <label>Speed<input id="velocidadVoz" type="range" min=".6" max="1.25" step=".05" value=".9"><span id="valorVelocidad">0.90x</span></label>
+
+      <div class="section-head">
+
+        <div>
+
+          <p class="eyebrow">
+            VOICE ASSISTANT
+          </p>
+
+          <h2>
+            Alertas en español
+          </h2>
+
+        </div>
+
+
+        <button
+          id="botonVoz"
+          class="icon-button"
+          type="button"
+          aria-label="Activar o desactivar voz"
+        >
+          🔊
+        </button>
+
       </div>
-      <button id="botonProbarVoz" class="ghost">TEST VOICE</button>
+
+
+      <div class="grid-2">
+
+        <label>
+          Voz
+
+          <select id="selectorVoz">
+
+            <option>
+              Cargando voces...
+            </option>
+
+          </select>
+        </label>
+
+
+        <label>
+          Velocidad
+
+          <input
+            id="velocidadVoz"
+            type="range"
+            min="0.6"
+            max="1.25"
+            step="0.05"
+            value="0.9"
+          >
+
+          <span id="valorVelocidad">
+            0.90x
+          </span>
+        </label>
+
+      </div>
+
+
+      <button
+        id="botonProbarVoz"
+        class="ghost"
+        type="button"
+      >
+        PROBAR VOZ
+      </button>
+
     </section>
+
+
+    <!-- ==================================================
+    REGISTRO
+    =================================================== -->
 
     <section class="card">
-      <div class="section-head"><div><p class="eyebrow">ACTIVITY</p><h2>System log</h2></div><button id="botonLimpiarRegistro" class="ghost small">CLEAR</button></div>
-      <div id="registroActividad" class="log"></div>
+
+      <div class="section-head">
+
+        <div>
+
+          <p class="eyebrow">
+            ACTIVITY
+          </p>
+
+          <h2>
+            Registro del sistema
+          </h2>
+
+        </div>
+
+
+        <button
+          id="botonLimpiarRegistro"
+          class="ghost small"
+          type="button"
+        >
+          LIMPIAR
+        </button>
+
+      </div>
+
+
+      <div
+        id="registroActividad"
+        class="log"
+      ></div>
+
     </section>
 
-    <footer>Trading Analyst Pro MR · Development build · Use demo testing first</footer>
+
+    <!-- ==================================================
+    PIE DE PÁGINA
+    =================================================== -->
+
+    <footer>
+      Trading Analyst Pro MR · Versión de desarrollo · Realice primero las pruebas en demo
+    </footer>
+
   </main>
 
-  <div id="capsulaSenal" class="signal-toast" aria-hidden="true">
-    <small id="estadoCapsula">PREPARE</small>
-    <strong id="valorCapsula">--</strong>
-    <p id="detalleCapsula">--</p>
+
+  <!-- ==================================================
+  CÁPSULA DE ALERTA
+  =================================================== -->
+
+  <div
+    id="capsulaSenal"
+    class="signal-toast"
+    aria-hidden="true"
+  >
+
+    <small id="estadoCapsula">
+      PREPARE
+    </small>
+
+    <strong id="valorCapsula">
+      --
+    </strong>
+
+    <p id="detalleCapsula">
+      --
+    </p>
+
   </div>
 
-  <script type="module" src="./js/app.js?v=9.1.0"></script>
+
+  <!-- Todos los módulos están en la carpeta principal -->
+
+  <script
+    type="module"
+    src="./app.js?v=9.1.2"
+  ></script>
+
 </body>
 </html>
