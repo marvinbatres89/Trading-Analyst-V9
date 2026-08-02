@@ -11,7 +11,7 @@ Todos los archivos están en la carpeta principal.
 */
 
 const NOMBRE_CACHE =
-  "trading-analyst-pro-mr-9.1.2";
+  "trading-analyst-pro-mr-9.1.3";
 
 
 const ARCHIVOS = [
