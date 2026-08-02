@@ -1,0 +1,28 @@
+TRADING ANALYST V9 PRO MR — DEVELOPMENT BUILD
+
+Esta es una reconstrucción completa del proyecto para evitar mezclar archivos antiguos y caché.
+
+CAMBIOS PRINCIPALES
+- Nueva caché con versión 9.1.0.
+- Nombre final visible: Trading Analyst Pro MR.
+- Match aparece como Matches y la voz dice “Coincidencia”.
+- Motor dividido en búsqueda y señal bloqueada.
+- PREPARE tiene duración fija.
+- REVALIDATING es corto y basado en los últimos ticks.
+- EXECUTE NOW congela la señal durante la cuenta regresiva.
+- El motor deja de buscar mientras existe una señal activa.
+- PREDICTION siempre muestra un análisis manual visible.
+- Estadísticas separadas por mercado, estrategia, modo y horizonte.
+- Rise/Fall, Even/Odd, Over/Under y Matches tienen reglas distintas.
+
+INSTALACIÓN EN GITHUB
+1. Cree un repositorio nuevo o limpie el repositorio de pruebas.
+2. Suba todos los archivos conservando las carpetas css, js y assets.
+3. Active GitHub Pages desde Settings > Pages > Deploy from branch > main / root.
+4. Espere la publicación.
+5. Cierre la aplicación anterior por completo.
+6. Abra la nueva dirección y haga primero pruebas en demo.
+
+IMPORTANTE
+El Signal Score es una puntuación técnica interna, no una probabilidad garantizada.
+Esta herramienta no ejecuta operaciones ni garantiza beneficios.
